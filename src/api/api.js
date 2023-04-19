@@ -1,6 +1,6 @@
 const API_HOST = process.env.API_HOST;
 
-const { recordDataToObject } = require('./../helper.js');
+const { recordDataToObject } = require('./helper/helper.js');
 
 async function getDataFromServer(city) {
   const response = await fetch(
@@ -12,13 +12,6 @@ async function getDataFromServer(city) {
   );
   const data = await response.json();
   const obj = recordDataToObject(data);
-  // const data = await response.json();
-  // const obj = {
-  //   city: data.name,
-  //   temp: data.main.temp,
-  //   status: data.weather[0].description,
-  //   speedwind: data.wind.speed,
-  // };
 
   return obj;
 }
