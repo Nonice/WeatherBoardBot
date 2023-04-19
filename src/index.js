@@ -44,13 +44,10 @@ bot.hears(/^[а-яА-Я]+$/, async (ctx) => {
   ctx.reply(printWeatherData(data));
 });
 
-bot.on('message', async (ctx) => {
-  console.log(ctx.message);
-  if (ctx.message.location) {
-    const location = ctx.message.location;
-    const data = await getTrackFromServer(location);
-    ctx.reply(printWeatherData(data));
-  }
+bot.on('location', async (ctx) => {
+  const location = ctx.message.location;
+  const data = await getTrackFromServer(location);
+  ctx.reply(printWeatherData(data));
 });
 
 bot.launch();
