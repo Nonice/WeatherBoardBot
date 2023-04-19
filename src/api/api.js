@@ -1,10 +1,10 @@
-const link = process.env.LINK;
+const API_HOST = process.env.API_HOST;
 
 const { recordDataToObject } = require('./../helper.js');
 
 async function getDataFromServer(city) {
   const api =
-    link + `?q=${city}&appid=${process.env.API_TOKEN}&units=metric&lang=ua`;
+    API_HOST + `?q=${city}&appid=${process.env.API_TOKEN}&units=metric&lang=ua`;
   const response = await fetch(api, {
     method: 'get',
     headers: { 'Content-Type': 'application/json' },
@@ -24,7 +24,7 @@ async function getDataFromServer(city) {
 
 async function getTrackFromServer(location) {
   const api =
-    link +
+    API_HOST +
     `?lat=${location.latitude}&lon=${location.longitude}&appid=${process.env.API_TOKEN}&units=metric&lang=ua`;
   const response = await fetch(api, {
     method: 'get',
