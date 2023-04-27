@@ -31,13 +31,6 @@ bot.action('GetTrack', (ctx) => {
   ctx.reply('Будь ласка, надішліть свою геолокацію');
 });
 
-// bot.hears(/^[a-zA-Z]+$/, async (ctx) => {
-//   console.log(ctx.match[0]);
-//   const cityPerChat = ctx.match[0];
-//   const data = await getDataFromServer(cityPerChat);
-//   ctx.reply(printWeatherData(data));
-// });
-
 bot.on(message('text'), async (ctx) => {
   console.log(ctx.message.text);
   const cityPerChat = ctx.message.text;
