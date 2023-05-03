@@ -1,6 +1,6 @@
 const API_HOST = process.env.API_HOST;
 
-const { recordDataToObject } = require('./helper/helper.js');
+const { transformApiDataToStandart } = require('./helper/helper.js');
 
 /*
   getDataFromServer
@@ -22,7 +22,7 @@ async function getWeatherByCityName(city) {
     }
   );
   const data = await response.json();
-  const obj = recordDataToObject(data);
+  const obj = transformApiDataToStandart(data);
 
   return obj;
 }
@@ -41,7 +41,7 @@ async function getWeatherByLocation(location) {
     }
   );
   const data = await response.json();
-  const obj = recordDataToObject(data);
+  const obj = transformApiDataToStandart(data);
 
   return obj;
 }

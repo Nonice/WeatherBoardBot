@@ -1,14 +1,14 @@
 /*
-  recordDataToObject
+  transformApiDataToStandart
 
   record - transform `Data` to `Object`
   Data - api result
   Object - standart data for service 
 
-  transformApiResultToStandart
+  transformApiDataToStandart
 */
 
-function recordDataToObject(data) {
+function transformApiDataToStandart(data) {
   const obj = {
     city: data.name,
     temp: data.main.temp,
@@ -19,4 +19,4 @@ function recordDataToObject(data) {
   return obj;
 }
 
-module.exports = { recordDataToObject };
+module.exports = { transformApiDataToStandart };
