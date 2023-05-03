@@ -1,5 +1,5 @@
 /*
-  printWeatherData
+  transformStandartDataForOutputToUser
 
   print - transform
   WeatherData - standart api service data
@@ -8,7 +8,7 @@
   transformStandartDataForOutputToUser
 */
 
-function printWeatherData(weatherData) {
+function transformStandartDataForOutputToUser(weatherData) {
   return (
     `📍Погода за вашими координатами \n` +
     `🌡️ Температура: ${weatherData.temp}°C \n` +
@@ -17,4 +17,4 @@ function printWeatherData(weatherData) {
   );
 }
 
-module.exports = { printWeatherData };
+module.exports = { transformStandartDataForOutputToUser };
