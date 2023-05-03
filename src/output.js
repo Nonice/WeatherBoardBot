@@ -1,13 +1,3 @@
-/*
-  transformStandartDataForOutputToUser
-
-  print - transform
-  WeatherData - standart api service data
-  '' - to message | for output
-
-  transformStandartDataForOutputToUser
-*/
-
 function transformStandartDataForOutputToUser(weatherData) {
   return (
     `📍Погода за вашими координатами \n` +
