@@ -5,7 +5,7 @@ const { message } = require('telegraf/filters');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const { getWeatherByCityName, getTrackFromServer } = require('./api/api');
+const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
 const { printWeatherData } = require('./output.js');
 
 bot.start((ctx) => {
@@ -40,7 +40,7 @@ bot.on(message('text'), async (ctx) => {
 
 bot.on(message('location'), async (ctx) => {
   const location = ctx.message.location;
-  const data = await getTrackFromServer(location);
+  const data = await getWeatherByLocation(location);
   ctx.reply(printWeatherData(data));
 });
 

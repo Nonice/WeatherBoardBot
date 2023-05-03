@@ -32,7 +32,7 @@ async function getWeatherByCityName(city) {
 
   getWeatherByLocation
 */
-async function getTrackFromServer(location) {
+async function getWeatherByLocation(location) {
   const response = await fetch(
     `${API_HOST}?lat=${location.latitude}&lon=${location.longitude}&appid=${process.env.API_TOKEN}&units=metric&lang=ua`,
     {
@@ -46,4 +46,4 @@ async function getTrackFromServer(location) {
   return obj;
 }
 
-module.exports = { getWeatherByCityName, getTrackFromServer };
+module.exports = { getWeatherByCityName, getWeatherByLocation };
