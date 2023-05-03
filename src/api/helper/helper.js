@@ -1,3 +1,13 @@
+/*
+  recordDataToObject
+
+  record - transform `Data` to `Object`
+  Data - api result
+  Object - standart data for service 
+
+  transformApiResultToStandart
+*/
+
 function recordDataToObject(data) {
   const obj = {
     city: data.name,
