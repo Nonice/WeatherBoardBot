@@ -1,4 +1,4 @@
-function printWeatherData(weatherData) {
+function transformStandartDataForOutputToUser(weatherData) {
   return (
     `📍Погода за вашими координатами \n` +
     `🌡️ Температура: ${weatherData.temp}°C \n` +
@@ -7,4 +7,4 @@ function printWeatherData(weatherData) {
   );
 }
 
-module.exports = { printWeatherData };
+module.exports = { transformStandartDataForOutputToUser };
