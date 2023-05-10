@@ -9,18 +9,49 @@ const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
 const { transformStandartDataForOutputToUser } = require('./output.js');
 
 bot.start((ctx) => {
-  ctx.replyWithHTML('Оберіть, будь ласка, місто', {
+  ctx.replyWithHTML('    Menu   ', {
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Знайти за геолокацією', callback_data: 'GetTrack' }],
-        [{ text: 'Знайти за назвою', callback_data: 'GetData' }],
+        [{ text: 'Weather', callback_data: 'Weather' }],
+        [{ text: 'Settings', callback_data: 'Settings' }],
       ],
     },
   });
 });
 
-bot.hears(/Привіт+/i, (ctx) => {
-  ctx.reply('\u{1F44B}');
+bot.action('Weather', (ctx) => {
+  ctx.replyWithHTML('Оберіть, будь ласка, місто', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Знайти за геолокацією', callback_data: 'GetTrack' }],
+        [{ text: 'Знайти за назвою', callback_data: 'GetData' }],
+        [{ text: ' « Back', callback_data: 'Back' }],
+      ],
+    },
+  });
+});
+
+bot.action('Settings', (ctx) => {
+  ctx.replyWithHTML('Settings', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Notification', callback_data: 'Notification' }],
+        [{ text: ' « Back', callback_data: 'Back' }],
+      ],
+    },
+  });
+});
+
+bot.action('Back', async (ctx) => {
+  ctx.editMessageText(' Menu ', {
+    // parse_mode: 'HTML',
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Weather', callback_data: 'Weather' }],
+        [{ text: 'Settings', callback_data: 'Settings' }],
+      ],
+    },
+  });
 });
 
 bot.action('GetData', (ctx) => {
