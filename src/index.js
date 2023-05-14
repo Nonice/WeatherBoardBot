@@ -54,19 +54,23 @@ bot.action('Back', async (ctx) => {
   });
 });
 
-bot.action('GetData', (ctx) => {
+bot.action('GetData', async (ctx) => {
   ctx.reply('Будь ласка, напишіть назву міста');
+  bot.on(message('text'), async (ctx) => {
+    console.log(ctx.message.text);
+    const cityPerChat = ctx.message.text;
+    const data = await getWeatherByCityName(cityPerChat);
+    ctx.reply(transformStandartDataForOutputToUser(data));
+  });
 });
 
 bot.action('GetTrack', (ctx) => {
   ctx.reply('Будь ласка, надішліть свою геолокацію');
-});
-
-bot.on(message('text'), async (ctx) => {
-  console.log(ctx.message.text);
-  const cityPerChat = ctx.message.text;
-  const data = await getWeatherByCityName(cityPerChat);
-  ctx.reply(transformStandartDataForOutputToUser(data));
+  bot.on(message('location'), async (ctx) => {
+    const location = ctx.message.location;
+    const data = await getWeatherByLocation(location);
+    ctx.reply(transformStandartDataForOutputToUser(data));
+  });
 });
 
 bot.on(message('location'), async (ctx) => {
