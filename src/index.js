@@ -1,12 +1,17 @@
 require('dotenv').config();
 
-const { Telegraf, Markup } = require('telegraf');
+const { Telegraf } = require('telegraf');
 const { message } = require('telegraf/filters');
+const LocalSession = require('telegraf-session-local');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
 const { transformStandartDataForOutputToUser } = require('./output.js');
+const { isCityName } = require('./middlewares/isCityName.middleware');
+
+// TODO: Moved `example_db.json` to config
+bot.use(new LocalSession({ database: 'example_db.json' }).middleware());
 
 bot.start((ctx) => {
   ctx.replyWithHTML('⠀⠀⠀⠀⠀⠀Menu', {
@@ -46,17 +51,24 @@ bot.command('menu', (ctx) => {
 });
 
 bot.command('location', async (ctx) => {
+  // TODO: Move to func 2
   ctx.reply('Будь ласка, надішліть свою геолокацію');
 });
 
 bot.command('city_name', async (ctx) => {
+  // TODO:  Move to func 1
   ctx.reply('Будь ласка, напишіть назву міста');
-  bot.on(message('text'), async (ctx) => {
-    console.log(ctx.message.text);
-    const cityPerChat = ctx.message.text;
-    const data = await getWeatherByCityName(cityPerChat);
-    ctx.reply(transformStandartDataForOutputToUser(data));
-  });
+
+  ctx.session.cityName = true;
+});
+
+bot.on(message('text'), isCityName, async (ctx) => {
+  console.log(ctx.message.text);
+  const cityPerChat = ctx.message.text;
+  const data = await getWeatherByCityName(cityPerChat);
+  ctx.session.cityName = false;
+
+  ctx.reply(transformStandartDataForOutputToUser(data));
 });
 
 bot.action('Weather', (ctx) => {
@@ -84,7 +96,6 @@ bot.action('Settings', (ctx) => {
 
 bot.action('Back', async (ctx) => {
   ctx.editMessageText(' Menu ', {
-    // parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Weather', callback_data: 'Weather' }],
@@ -95,16 +106,14 @@ bot.action('Back', async (ctx) => {
 });
 
 bot.action('GetData', async (ctx) => {
+  // TODO:  Move to func 1
   ctx.reply('Будь ласка, напишіть назву міста');
-  bot.on(message('text'), async (ctx) => {
-    console.log(ctx.message.text);
-    const cityPerChat = ctx.message.text;
-    const data = await getWeatherByCityName(cityPerChat);
-    ctx.reply(transformStandartDataForOutputToUser(data));
-  });
+
+  ctx.session.cityName = true;
 });
 
 bot.action('GetTrack', (ctx) => {
+  // TODO: Move to func 2
   ctx.reply('Будь ласка, надішліть свою геолокацію');
 });
 
