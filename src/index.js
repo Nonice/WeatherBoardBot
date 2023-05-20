@@ -6,10 +6,10 @@ const { message } = require('telegraf/filters');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
-const { transformStandartDataForOutputToUser } = require('./output.js');
+const { transformStandartDataForOutputToUser, test } = require('./output.js');
 
 bot.start((ctx) => {
-  ctx.replyWithHTML('    Menu   ', {
+  ctx.replyWithHTML('⠀⠀⠀⠀⠀⠀Menu', {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Weather', callback_data: 'Weather' }],
@@ -19,8 +19,48 @@ bot.start((ctx) => {
   });
 });
 
+bot.telegram.setMyCommands([
+  {
+    command: 'menu',
+    description: 'menu',
+  },
+  {
+    command: 'location',
+    description: 'menu',
+  },
+  {
+    command: 'city_name',
+    description: 'menu',
+  },
+]);
+
+bot.command('menu', (ctx) => {
+  ctx.replyWithHTML('⠀⠀⠀⠀⠀Menu', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Weather', callback_data: 'Weather' }],
+        [{ text: 'Settings', callback_data: 'Settings' }],
+      ],
+    },
+  });
+});
+
+bot.command('location', async (ctx) => {
+  ctx.reply('Будь ласка, надішліть свою геолокацію');
+});
+
+bot.command('city_name', async (ctx) => {
+  ctx.reply('Будь ласка, напишіть назву міста');
+  bot.on(message('text'), async (ctx) => {
+    console.log(ctx.message.text);
+    const cityPerChat = ctx.message.text;
+    const data = await getWeatherByCityName(cityPerChat);
+    ctx.reply(transformStandartDataForOutputToUser(data));
+  });
+});
+
 bot.action('Weather', (ctx) => {
-  ctx.replyWithHTML('Оберіть, будь ласка, місто', {
+  ctx.editMessageText(' Оберіть, будь ласка, місто ', {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Знайти за геолокацією', callback_data: 'GetTrack' }],
@@ -32,7 +72,7 @@ bot.action('Weather', (ctx) => {
 });
 
 bot.action('Settings', (ctx) => {
-  ctx.replyWithHTML('Settings', {
+  ctx.editMessageText(' Settings ', {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Notification', callback_data: 'Notification' }],
@@ -66,11 +106,6 @@ bot.action('GetData', async (ctx) => {
 
 bot.action('GetTrack', (ctx) => {
   ctx.reply('Будь ласка, надішліть свою геолокацію');
-  bot.on(message('location'), async (ctx) => {
-    const location = ctx.message.location;
-    const data = await getWeatherByLocation(location);
-    ctx.reply(transformStandartDataForOutputToUser(data));
-  });
 });
 
 bot.on(message('location'), async (ctx) => {

@@ -7,4 +7,6 @@ function transformStandartDataForOutputToUser(weatherData) {
   );
 }
 
-module.exports = { transformStandartDataForOutputToUser };
+async function test(testData) {}
+
+module.exports = { transformStandartDataForOutputToUser, test };
