@@ -6,7 +6,7 @@ const { message } = require('telegraf/filters');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
-const { transformStandartDataForOutputToUser, test } = require('./output.js');
+const { transformStandartDataForOutputToUser } = require('./output.js');
 
 bot.start((ctx) => {
   ctx.replyWithHTML('⠀⠀⠀⠀⠀⠀Menu', {
