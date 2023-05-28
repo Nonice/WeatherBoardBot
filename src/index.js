@@ -6,8 +6,12 @@ const LocalSession = require('telegraf-session-local');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
-const { transformStandartDataForOutputToUser } = require('./output.js');
+const {
+  transformStandartDataForOutputToUser,
+  getCityNameSession,
+  requestWeatherFromUserLocation,
+  requestWeatherFromUserCity,
+} = require('./helper.js');
 const { isCityName } = require('./middlewares/isCityName.middleware');
 
 // TODO: Moved `example_db.json` to config
@@ -55,21 +59,9 @@ bot.command('location', async (ctx) => {
   ctx.reply('Будь ласка, надішліть свою геолокацію');
 });
 
-bot.command('city_name', async (ctx) => {
-  // TODO:  Move to func 1
-  ctx.reply('Будь ласка, напишіть назву міста');
+bot.command('city_name', getCityNameSession);
 
-  ctx.session.cityName = true;
-});
-
-bot.on(message('text'), isCityName, async (ctx) => {
-  console.log(ctx.message.text);
-  const cityPerChat = ctx.message.text;
-  const data = await getWeatherByCityName(cityPerChat);
-  ctx.session.cityName = false;
-
-  ctx.reply(transformStandartDataForOutputToUser(data));
-});
+bot.on(message('text'), isCityName, requestWeatherFromUserCity);
 
 bot.action('Weather', (ctx) => {
   ctx.editMessageText(' Оберіть, будь ласка, місто ', {
@@ -105,22 +97,13 @@ bot.action('Back', async (ctx) => {
   });
 });
 
-bot.action('GetData', async (ctx) => {
-  // TODO:  Move to func 1
-  ctx.reply('Будь ласка, напишіть назву міста');
-
-  ctx.session.cityName = true;
-});
+bot.action('GetData', getCityNameSession);
 
 bot.action('GetTrack', (ctx) => {
   // TODO: Move to func 2
   ctx.reply('Будь ласка, надішліть свою геолокацію');
 });
 
-bot.on(message('location'), async (ctx) => {
-  const location = ctx.message.location;
-  const data = await getWeatherByLocation(location);
-  ctx.reply(transformStandartDataForOutputToUser(data));
-});
+bot.on(message('location'), requestWeatherFromUserLocation);
 
 bot.launch();
