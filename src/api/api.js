@@ -10,10 +10,12 @@ async function getWeatherByCityName(city) {
       headers: { 'Content-Type': 'application/json' },
     }
   );
-  const data = await response.json();
-  const obj = transformApiDataToStandart(data);
 
-  return obj;
+  const data = await response.json();
+
+  if (data.cod !== 200) return data;
+
+  return transformApiDataToStandart(data);
 }
 
 async function getWeatherByLocation(location) {
@@ -24,6 +26,7 @@ async function getWeatherByLocation(location) {
       headers: { 'Content-Type': 'application/json' },
     }
   );
+
   const data = await response.json();
   const obj = transformApiDataToStandart(data);
 

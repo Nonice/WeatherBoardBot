@@ -1,4 +1,5 @@
 const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
+const { cityErrorMessage } = require('./messages/cityErrorMessage');
 
 function transformStandartDataForOutputToUser(weatherData) {
   return (
@@ -9,8 +10,8 @@ function transformStandartDataForOutputToUser(weatherData) {
   );
 }
 
+// TODO: RENAME and move to `something...`
 const getCityNameSession = async (ctx) => {
-  // TODO:  Move to func 1
   ctx.reply('Будь ласка, напишіть назву міста');
   ctx.session.cityName = true;
 };
@@ -25,7 +26,14 @@ const requestWeatherFromUserCity = async (ctx) => {
   console.log(ctx.message.text);
   const cityPerChat = ctx.message.text;
   const data = await getWeatherByCityName(cityPerChat);
+
   ctx.session.cityName = false;
+
+  if (data.cod !== 200) {
+    ctx.reply(cityErrorMessage(data.message));
+    return;
+  }
+
   ctx.reply(transformStandartDataForOutputToUser(data));
 };
 
