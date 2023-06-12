@@ -7,15 +7,44 @@ const LocalSession = require('telegraf-session-local');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const {
+  mdfckj,
+  functionNotificated,
+  checkedNotificatedTimeNorms,
+  timeConverter,
   transformStandartDataForOutputToUser,
   getCityNameSession,
   requestWeatherFromUserLocation,
   requestWeatherFromUserCity,
 } = require('./helper.js');
 const { isCityName } = require('./middlewares/isCityName.middleware');
+const { isNotification } = require('./middlewares/isNotification.middleware');
 
 // TODO: Moved `example_db.json` to config
 bot.use(new LocalSession({ database: 'example_db.json' }).middleware());
+
+// const localSession = new LocalSession({
+//   database: 'example_db.json',
+//   property: 'session',
+//   storage: LocalSession.storageFileAsync,
+//   format: {
+//     serialize: (obj) => JSON.stringify(obj, null, 2),
+//     deserialize: (str) => JSON.parse(str),
+//   },
+//   state: { messages: [] },
+// });
+
+// localSession.DB.then((DB) => {
+//   setTimeout(mdfckj, 10000, DB.get('sessions').value());   // console.log(DB.get('sessions').value());
+// });
+
+// telegram id
+bot.action('Notification', (ctx) => {
+  ctx.session.notificationCheck = true;
+  const userID = ctx.from.id;
+  ctx.session.userID = userID;
+  ctx.reply('write time pls {exsemple 20:00}');
+  timeConverter(ctx.session.timeNotified);
+});
 
 bot.start((ctx) => {
   ctx.replyWithHTML('⠀⠀⠀⠀⠀⠀Menu', {
@@ -61,8 +90,6 @@ bot.command('location', async (ctx) => {
 
 bot.command('city_name', getCityNameSession);
 
-bot.on(message('text'), isCityName, requestWeatherFromUserCity);
-
 bot.action('Weather', (ctx) => {
   ctx.editMessageText(' Оберіть, будь ласка, місто ', {
     reply_markup: {
@@ -105,5 +132,23 @@ bot.action('GetTrack', (ctx) => {
 });
 
 bot.on(message('location'), requestWeatherFromUserLocation);
+
+// bot.on(message('text'), isCityName, requestWeatherFromUserCity);
+
+// isNotification;
+// bot.on(message('text'), isNotification, functionNotificated);
+
+bot.on(message('text'), (ctx) => {
+  if (isCityName(ctx)) {
+    requestWeatherFromUserCity(ctx);
+  }
+  if (isNotification(ctx)) {
+    // return ctx.reply(`SECOND WORKING: ${ctx.message.text}`);
+    // console.log(typeof ctx.message.text);
+    checkedNotificatedTimeNorms(ctx);
+  }
+  // console.log(isFinite(ctx.message.text));
+  // console.log(Number.isFinite(ctx.message.text));
+});
 
 bot.launch();

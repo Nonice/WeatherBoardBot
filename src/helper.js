@@ -10,6 +10,22 @@ function transformStandartDataForOutputToUser(weatherData) {
   );
 }
 
+function mdfckj(sessionData) {
+  let timeNow =
+    new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
+  let test = 0;
+  sessionData.forEach(({ data: { timeNotified } }) => {
+    console.log((test += 1));
+    let userTime = timeConverter(timeNotified);
+    if (timeNow == userTime) {
+      console.log('success');
+    }
+    console.log('success but not is timer');
+    console.log(timeNotified);
+  });
+  // return mdfckj(sessionData);
+}
+
 // TODO: RENAME and move to `something...`
 const getCityNameSession = async (ctx) => {
   ctx.reply('Будь ласка, напишіть назву міста');
@@ -37,7 +53,49 @@ const requestWeatherFromUserCity = async (ctx) => {
   ctx.reply(transformStandartDataForOutputToUser(data));
 };
 
+const functionNotificated = async (ctx) => {
+  const test = ctx.message.text;
+  ctx.session.timeNotified = test;
+  console.log(ctx.session.timeNotified);
+};
+
+function timeConverter(timeNotified) {
+  hours = Number(timeNotified[0] + timeNotified[1]);
+  minutes = Number(timeNotified[3] + timeNotified[4]);
+  const time = hours * 60 * 60 + minutes * 60;
+  // console.log(timeNotified);
+  // console.log(
+  //   new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60
+  // );
+  // console.log(time);
+  return time;
+}
+
+const checkedNotificatedTimeNorms = async (ctx) => {
+  if (ctx.message.text.length == 5) {
+    ctx.reply('succses');
+    let 
+    for (let i = 0; i < ctx.message.text.length; i++) {
+      // ctx.reply(ctx.message.text[i]);
+      if (isFinite(ctx.message.text[i])) {
+      } else if (ctx.message.text[i] == `:`) {
+        ctx.reply('it`s double dote');
+      } else {
+        ctx.reply('not number');
+        break;
+      }
+    }
+  } else {
+    ctx.reply('succses but leng not 5');
+    ctx.session.notificationCheck = true;
+  }
+};
+
 module.exports = {
+  mdfckj,
+  checkedNotificatedTimeNorms,
+  functionNotificated,
+  timeConverter,
   transformStandartDataForOutputToUser,
   getCityNameSession,
   requestWeatherFromUserLocation,

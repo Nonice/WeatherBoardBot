@@ -1,6 +1,6 @@
-function isCityName(ctx, next) {
+function isCityName(ctx) {
   if (ctx.session.cityName) {
-    next();
+    return true;
   }
 }
 
