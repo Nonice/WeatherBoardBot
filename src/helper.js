@@ -10,21 +10,21 @@ function transformStandartDataForOutputToUser(weatherData) {
   );
 }
 
-function mdfckj(sessionData) {
-  let timeNow =
-    new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
-  let test = 0;
-  sessionData.forEach(({ data: { timeNotified } }) => {
-    console.log((test += 1));
-    let userTime = timeConverter(timeNotified);
-    if (timeNow == userTime) {
-      console.log('success');
-    }
-    console.log('success but not is timer');
-    console.log(timeNotified);
-  });
-  // return mdfckj(sessionData);
-}
+// function mdfckj(sessionData) {
+//   let timeNow =
+//     new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
+//   let test = 0;
+//   sessionData.forEach(({ data: { timeNotified } }) => {
+//     console.log((test += 1));
+//     let userTime = timeConverter(timeNotified);
+//     if (timeNow == userTime) {
+//       console.log('success');
+//     }
+//     console.log('success but not is timer');
+//     console.log(timeNotified);
+//   });
+//   // return mdfckj(sessionData);
+// }
 
 // TODO: RENAME and move to `something...`
 const getCityNameSession = async (ctx) => {
@@ -62,39 +62,51 @@ const functionNotificated = async (ctx) => {
 function timeConverter(timeNotified) {
   hours = Number(timeNotified[0] + timeNotified[1]);
   minutes = Number(timeNotified[3] + timeNotified[4]);
-  const time = hours * 60 * 60 + minutes * 60;
-  // console.log(timeNotified);
-  // console.log(
-  //   new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60
-  // );
-  // console.log(time);
-  return time;
+  return hours * 60 * 60 + minutes * 60;
 }
 
 const checkedNotificatedTimeNorms = async (ctx) => {
   if (ctx.message.text.length == 5) {
     ctx.reply('succses');
-    let 
-    for (let i = 0; i < ctx.message.text.length; i++) {
-      // ctx.reply(ctx.message.text[i]);
-      if (isFinite(ctx.message.text[i])) {
-      } else if (ctx.message.text[i] == `:`) {
-        ctx.reply('it`s double dote');
-      } else {
-        ctx.reply('not number');
-        break;
-      }
+
+    if (!isFinite(ctx.message.text[0])) {
+      ctx.reply('Not valid');
+      return;
     }
-  } else {
-    ctx.reply('succses but leng not 5');
-    ctx.session.notificationCheck = true;
+
+    if (!isFinite(ctx.message.text[1])) {
+      ctx.reply('Not valid');
+      return;
+    }
+
+    if (ctx.message.text[2] !== ':') {
+      ctx.reply('Not valid :');
+      return;
+    }
+
+    if (!isFinite(ctx.message.text[3])) {
+      ctx.reply('Not valid');
+      return;
+    }
+
+    if (!isFinite(ctx.message.text[4])) {
+      ctx.reply('Not valid');
+      return;
+    }
+
+    ctx.session.timeNotified = timeConverter(ctx.message.text);
+    ctx.session.notificationCheck = false;
+
+    return;
   }
+
+  ctx.reply('Succses but length not 5');
+  ctx.session.notificationCheck = true;
 };
 
 module.exports = {
-  mdfckj,
+  // mdfckj,
   checkedNotificatedTimeNorms,
-  functionNotificated,
   timeConverter,
   transformStandartDataForOutputToUser,
   getCityNameSession,

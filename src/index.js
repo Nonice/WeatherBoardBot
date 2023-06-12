@@ -7,8 +7,6 @@ const LocalSession = require('telegraf-session-local');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const {
-  mdfckj,
-  functionNotificated,
   checkedNotificatedTimeNorms,
   timeConverter,
   transformStandartDataForOutputToUser,
@@ -19,31 +17,26 @@ const {
 const { isCityName } = require('./middlewares/isCityName.middleware');
 const { isNotification } = require('./middlewares/isNotification.middleware');
 
+const localSession = new LocalSession({
+  database: 'example_db.json',
+  property: 'session',
+  storage: LocalSession.storageFileAsync,
+  format: {
+    serialize: (obj) => JSON.stringify(obj, null, 2),
+    deserialize: (str) => JSON.parse(str),
+  },
+  state: { messages: [] },
+});
+
 // TODO: Moved `example_db.json` to config
-bot.use(new LocalSession({ database: 'example_db.json' }).middleware());
-
-// const localSession = new LocalSession({
-//   database: 'example_db.json',
-//   property: 'session',
-//   storage: LocalSession.storageFileAsync,
-//   format: {
-//     serialize: (obj) => JSON.stringify(obj, null, 2),
-//     deserialize: (str) => JSON.parse(str),
-//   },
-//   state: { messages: [] },
-// });
-
-// localSession.DB.then((DB) => {
-//   setTimeout(mdfckj, 10000, DB.get('sessions').value());   // console.log(DB.get('sessions').value());
-// });
+bot.use(localSession);
 
 // telegram id
 bot.action('Notification', (ctx) => {
   ctx.session.notificationCheck = true;
-  const userID = ctx.from.id;
-  ctx.session.userID = userID;
-  ctx.reply('write time pls {exsemple 20:00}');
-  timeConverter(ctx.session.timeNotified);
+  ctx.session.userID = ctx.from.id;
+
+  ctx.reply('Write time PLS {example 20:00}:');
 });
 
 bot.start((ctx) => {
@@ -135,20 +128,46 @@ bot.on(message('location'), requestWeatherFromUserLocation);
 
 // bot.on(message('text'), isCityName, requestWeatherFromUserCity);
 
-// isNotification;
-// bot.on(message('text'), isNotification, functionNotificated);
-
 bot.on(message('text'), (ctx) => {
   if (isCityName(ctx)) {
     requestWeatherFromUserCity(ctx);
+    return;
   }
   if (isNotification(ctx)) {
     // return ctx.reply(`SECOND WORKING: ${ctx.message.text}`);
     // console.log(typeof ctx.message.text);
     checkedNotificatedTimeNorms(ctx);
+    return;
   }
   // console.log(isFinite(ctx.message.text));
   // console.log(Number.isFinite(ctx.message.text));
 });
 
 bot.launch();
+
+localSession.DB.then((DB) => {
+  setTimeout(function innerTimeout() {
+    const sessionData = DB.get('sessions').value();
+    console.log(
+      '🚀 ~ file: index.js:155 ~ setInterval ~ sessionData:',
+      sessionData
+    );
+
+    let timeNow =
+      new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
+
+    sessionData.forEach(({ data: { userID, timeNotified } }) => {
+      if (!userID || !timeNotified) return;
+
+      console.log(timeNow, timeNotified);
+      if (timeNow == timeNotified) {
+        bot.telegram.sendMessage(
+          userID,
+          `TIME WEATHER, ${userID} on time ${timeNotified}`
+        );
+      }
+    });
+
+    setTimeout(innerTimeout, 60000);
+  }, 60000);
+});
