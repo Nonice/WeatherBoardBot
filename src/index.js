@@ -7,7 +7,6 @@ const LocalSession = require('telegraf-session-local');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const {
-  mdfckj,
   functionNotificated,
   checkedNotificatedTimeNorms,
   timeConverter,
@@ -21,21 +20,6 @@ const { isNotification } = require('./middlewares/isNotification.middleware');
 
 // TODO: Moved `example_db.json` to config
 bot.use(new LocalSession({ database: 'example_db.json' }).middleware());
-
-// const localSession = new LocalSession({
-//   database: 'example_db.json',
-//   property: 'session',
-//   storage: LocalSession.storageFileAsync,
-//   format: {
-//     serialize: (obj) => JSON.stringify(obj, null, 2),
-//     deserialize: (str) => JSON.parse(str),
-//   },
-//   state: { messages: [] },
-// });
-
-// localSession.DB.then((DB) => {
-//   setTimeout(mdfckj, 10000, DB.get('sessions').value());   // console.log(DB.get('sessions').value());
-// });
 
 // telegram id
 bot.action('Notification', (ctx) => {
@@ -106,7 +90,19 @@ bot.action('Settings', (ctx) => {
   ctx.editMessageText(' Settings ', {
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Notification', callback_data: 'Notification' }],
+        [{ text: 'Notification', callback_data: 'NotiMenu' }],
+        [{ text: ' « Back', callback_data: 'Back' }],
+      ],
+    },
+  });
+});
+
+bot.action('NotiMenu', (ctx) => {
+  ctx.editMessageText(' Notification ', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Add Notification', callback_data: 'Notification' }],
+        [{ text: 'Delete Notification', callback_data: '-' }],
         [{ text: ' « Back', callback_data: 'Back' }],
       ],
     },
@@ -152,3 +148,34 @@ bot.on(message('text'), (ctx) => {
 });
 
 bot.launch();
+
+const localSession = new LocalSession({
+  database: 'example_db.json',
+  property: 'session',
+  storage: LocalSession.storageFileAsync,
+  format: {
+    serialize: (obj) => JSON.stringify(obj, null, 2),
+    deserialize: (str) => JSON.parse(str),
+  },
+  state: { messages: [] },
+});
+
+localSession.DB.then((DB) => {
+  // setTimeout(mdfckj, 10000, DB.get('sessions').value());
+  // console.log(DB.get('sessions').value());
+
+  setInterval(function mdfckj() {
+    const sessionData = DB.get('sessions').value();
+    let timeNow =
+      new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
+    console.log(timeNow);
+    sessionData.forEach(({ data: { timeNotified } }) => {
+      if (timeNotified == timeNow) {
+        console.log('success');
+      } else {
+        console.log('success but not is timer');
+        console.log(timeNotified);
+      }
+    });
+  }, 60000);
+});

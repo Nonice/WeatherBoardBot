@@ -10,22 +10,6 @@ function transformStandartDataForOutputToUser(weatherData) {
   );
 }
 
-function mdfckj(sessionData) {
-  let timeNow =
-    new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
-  let test = 0;
-  sessionData.forEach(({ data: { timeNotified } }) => {
-    console.log((test += 1));
-    let userTime = timeConverter(timeNotified);
-    if (timeNow == userTime) {
-      console.log('success');
-    }
-    console.log('success but not is timer');
-    console.log(timeNotified);
-  });
-  // return mdfckj(sessionData);
-}
-
 // TODO: RENAME and move to `something...`
 const getCityNameSession = async (ctx) => {
   ctx.reply('Будь ласка, напишіть назву міста');
@@ -63,36 +47,42 @@ function timeConverter(timeNotified) {
   hours = Number(timeNotified[0] + timeNotified[1]);
   minutes = Number(timeNotified[3] + timeNotified[4]);
   const time = hours * 60 * 60 + minutes * 60;
-  // console.log(timeNotified);
+  console.log(timeNotified);
   // console.log(
   //   new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60
   // );
-  // console.log(time);
+  console.log(time);
   return time;
 }
 
 const checkedNotificatedTimeNorms = async (ctx) => {
+  let cheked = new Boolean(true);
+
   if (ctx.message.text.length == 5) {
-    ctx.reply('succses');
-    let 
     for (let i = 0; i < ctx.message.text.length; i++) {
-      // ctx.reply(ctx.message.text[i]);
+      // ctx.reply(ctx.message.text[i] + 'and ' + i);
       if (isFinite(ctx.message.text[i])) {
-      } else if (ctx.message.text[i] == `:`) {
-        ctx.reply('it`s double dote');
+      } else if (ctx.message.text[i] == `:` && i == 2) {
+        // ctx.reply('it`s double dote');
       } else {
-        ctx.reply('not number');
+        ctx.reply('succses but not norm');
+        cheked = false;
+        ctx.session.notificationCheck = true;
         break;
       }
     }
   } else {
     ctx.reply('succses but leng not 5');
+    cheked = false;
     ctx.session.notificationCheck = true;
+  }
+
+  if (cheked) {
+    ctx.session.timeNotified = timeConverter(ctx.message.text);
   }
 };
 
 module.exports = {
-  mdfckj,
   checkedNotificatedTimeNorms,
   functionNotificated,
   timeConverter,
