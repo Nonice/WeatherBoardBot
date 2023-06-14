@@ -48,9 +48,6 @@ function timeConverter(timeNotified) {
   minutes = Number(timeNotified[3] + timeNotified[4]);
   const time = hours * 60 * 60 + minutes * 60;
   console.log(timeNotified);
-  // console.log(
-  //   new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60
-  // );
   console.log(time);
   return time;
 }
@@ -79,10 +76,22 @@ const checkedNotificatedTimeNorms = async (ctx) => {
 
   if (cheked) {
     ctx.session.timeNotified = timeConverter(ctx.message.text);
+    ctx.reply('time converted');
+    // Ask a Question for ivan
+    ctx.session.notificationCheck = false;
   }
 };
 
+function notification(city) {
+  let weatherData = getWeatherByCityName(city);
+  let message = transformStandartDataForOutputToUser(
+    getWeatherByCityName(city)
+  );
+  return message;
+}
+
 module.exports = {
+  notification,
   checkedNotificatedTimeNorms,
   functionNotificated,
   timeConverter,

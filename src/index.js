@@ -7,6 +7,7 @@ const LocalSession = require('telegraf-session-local');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const {
+  notification,
   functionNotificated,
   checkedNotificatedTimeNorms,
   timeConverter,
@@ -24,10 +25,9 @@ bot.use(new LocalSession({ database: 'example_db.json' }).middleware());
 // telegram id
 bot.action('Notification', (ctx) => {
   ctx.session.notificationCheck = true;
-  const userID = ctx.from.id;
-  ctx.session.userID = userID;
+  ctx.session.userID = ctx.from.id;
   ctx.reply('write time pls {exsemple 20:00}');
-  timeConverter(ctx.session.timeNotified);
+  // timeConverter(ctx.session.timeNotified);
 });
 
 bot.start((ctx) => {
@@ -160,6 +160,9 @@ const localSession = new LocalSession({
   state: { messages: [] },
 });
 
+const { transformApiDataToStandart } = require('./helper/helper.js');
+const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
+
 localSession.DB.then((DB) => {
   // setTimeout(mdfckj, 10000, DB.get('sessions').value());
   // console.log(DB.get('sessions').value());
@@ -168,13 +171,23 @@ localSession.DB.then((DB) => {
     const sessionData = DB.get('sessions').value();
     let timeNow =
       new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
-    console.log(timeNow);
-    sessionData.forEach(({ data: { timeNotified } }) => {
+    // console.log(timeNow);
+    sessionData.forEach(({ data: { timeNotified, userID, city } }) => {
       if (timeNotified == timeNow) {
-        console.log('success');
+        bot.telegram.sendMessage(userID, `message test`);
       } else {
-        console.log('success but not is timer');
-        console.log(timeNotified);
+        // console.log('success but not is timer');
+        // console.log(timeNotified);
+        // bot.telegram.sendMessage(userID, `message testnot time`);
+        // console.log(city);
+        // let message = notification(city);
+        // console.log(message);
+        // bot.telegram.sendMessage(userID, `${message}`);
+        // bot.telegram.sendMessage(userID, `${notification(city)}`);
+
+        console.log(
+          transformStandartDataForOutputToUser(getWeatherByCityName(city))
+        );
       }
     });
   }, 60000);
