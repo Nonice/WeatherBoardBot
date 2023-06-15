@@ -51,7 +51,7 @@ function timeConverter(timeNotified) {
   console.log(time);
   return time;
 }
-
+// wtf is
 const checkedNotificatedTimeNorms = async (ctx) => {
   let cheked = new Boolean(true);
 
@@ -76,17 +76,22 @@ const checkedNotificatedTimeNorms = async (ctx) => {
 
   if (cheked) {
     ctx.session.timeNotified = timeConverter(ctx.message.text);
-    ctx.reply('time converted');
+    // ctx.reply('write City');
+    await addCityToNotification(ctx);
     // Ask a Question for ivan
-    ctx.session.notificationCheck = false;
+    // ctx.session.notificationCheck = false;
   }
 };
+// wtf is
+const addCityToNotification = async (ctx) => {
+  ctx.reply('write City');
+  ctx.session.city = ctx.message.text;
+  ctx.session.notificationCheck = false;
+};
 
-function notification(city) {
-  let weatherData = getWeatherByCityName(city);
-  let message = transformStandartDataForOutputToUser(
-    getWeatherByCityName(city)
-  );
+async function notification(city) {
+  let weatherData = await getWeatherByCityName(city);
+  let message = transformStandartDataForOutputToUser(weatherData);
   return message;
 }
 
