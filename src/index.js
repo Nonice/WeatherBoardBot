@@ -7,18 +7,12 @@ const LocalSession = require('telegraf-session-local');
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const {
-  addCityToNotification,
-  notification,
-  functionNotificated,
   checkedNotificatedTimeNorms,
-  timeConverter,
-  transformStandartDataForOutputToUser,
+  checkedNotificatedCity,
   getCityNameSession,
   requestWeatherFromUserLocation,
   requestWeatherFromUserCity,
 } = require('./helper.js');
-const { isCityName } = require('./middlewares/isCityName.middleware');
-const { isNotification } = require('./middlewares/isNotification.middleware');
 
 // TODO: Moved `example_db.json` to config
 const localSession = new LocalSession({
@@ -29,12 +23,10 @@ const localSession = new LocalSession({
     serialize: (obj) => JSON.stringify(obj, null, 2),
     deserialize: (str) => JSON.parse(str),
   },
-  state: { messages: [] },
+  state: {},
 });
 
 bot.use(localSession);
-
-// bot.use(new LocalSession({ database: 'example_db.json' }).middleware());
 
 bot.start((ctx) => {
   ctx.replyWithHTML('⠀⠀⠀⠀⠀⠀Menu', {
@@ -108,7 +100,7 @@ bot.action('NotiMenu', (ctx) => {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Add Notification', callback_data: 'addNotification' }],
-        [{ text: 'Delete Notification', callback_data: 'deletNotification' }],
+        [{ text: 'Delete Notification', callback_data: 'deleteNotification' }],
         [{ text: ' « Back', callback_data: 'BackToMenu' }],
       ],
     },
@@ -117,18 +109,17 @@ bot.action('NotiMenu', (ctx) => {
 
 // telegram id
 bot.action('addNotification', (ctx) => {
-  ctx.session.notificationCheck = true;
+  ctx.session.notificationCheck = 'time';
   ctx.session.userID = ctx.from.id;
-  ctx.reply('write time pls {exsemple 20:00}');
-  // timeConverter(ctx.session.timeNotified);
+  ctx.reply('Enter time on notification(example 20:00): ');
 });
 
 // telegram id
-bot.action('deletNotification', (ctx) => {
+bot.action('deleteNotification', (ctx) => {
   ctx.session.notificationCheck = false;
   ctx.session.timeNotified = null;
-  ctx.reply('notions deleted');
-  // timeConverter(ctx.session.timeNotified);
+  ctx.session.timeNotifiedCity = null;
+  ctx.reply('Notification has been deleted');
 });
 
 bot.action('BackToMenu', async (ctx) => {
@@ -162,41 +153,62 @@ bot.action('GetTrack', (ctx) => {
 
 bot.on(message('location'), requestWeatherFromUserLocation);
 
-// bot.on(message('text'), isCityName, requestWeatherFromUserCity);
-
-// isNotification;
-// bot.on(message('text'), isNotification, functionNotificated);
-
-bot.on(message('text'), (ctx) => {
-  if (isCityName(ctx)) {
-    requestWeatherFromUserCity(ctx);
+bot.on(message('text'), async (ctx) => {
+  if (ctx.session.cityName) {
+    ctx.reply(
+      await requestWeatherFromUserCity({
+        messageText: ctx.message.text,
+        session: ctx.session,
+      })
+    );
+    return;
   }
-  if (isNotification(ctx)) {
-    // return ctx.reply(`SECOND WORKING: ${ctx.message.text}`);
-    // console.log(typeof ctx.message.text);
-    checkedNotificatedTimeNorms(ctx);
+
+  if (ctx.session.notificationCheck === 'time') {
+    ctx.reply(
+      await checkedNotificatedTimeNorms({
+        text: ctx.message.text,
+        session: ctx.session,
+      })
+    );
+    return;
   }
-  // console.log(isFinite(ctx.message.text));
-  // console.log(Number.isFinite(ctx.message.text));
+
+  if (ctx.session.notificationCheck === 'city') {
+    ctx.reply(
+      await checkedNotificatedCity({
+        text: ctx.message.text,
+        session: ctx.session,
+      })
+    );
+    return;
+  }
 });
 
 bot.launch();
 
-const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
-
 localSession.DB.then((DB) => {
-  // setTimeout(mdfckj, 10000, DB.get('sessions').value());
-  // console.log(DB.get('sessions').value());
-
-  setInterval(function mdfckj() {
+  setInterval(() => {
     const sessionData = DB.get('sessions').value();
-    let timeNow =
-      new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
-    // console.log(timeNow);
-    sessionData.forEach(async ({ data: { timeNotified, userID, city } }) => {
-      if (timeNotified == timeNow) {
-        bot.telegram.sendMessage(userID, `${await notification(city)}`);
+    const date = new Date();
+
+    let timeNow = date.getUTCHours() * 60 * 60 + date.getUTCMinutes() * 60;
+
+    sessionData.forEach(
+      async ({ data: { timeNotified, userID, timeNotifiedCity } }) => {
+        console.log(timeNotified, timeNow, timeNotifiedCity);
+        if (timeNotified == timeNow) {
+          const cityWeather = await requestWeatherFromUserCity({
+            messageText: timeNotifiedCity,
+          });
+
+          bot.telegram.sendMessage(
+            userID,
+            `Notification by ${date.getUTCHours()}:${date.getUTCMinutes()} UTC.
+					\n${cityWeather}`
+          );
+        }
       }
-    });
+    );
   }, 60000);
 });

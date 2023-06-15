@@ -4,6 +4,7 @@ const { cityErrorMessage } = require('./messages/cityErrorMessage');
 function transformStandartDataForOutputToUser(weatherData) {
   return (
     `📍Погода за вашими координатами \n` +
+    `🌆 Місто: ${weatherData.city}\n` +
     `🌡️ Температура: ${weatherData.temp}°C \n` +
     `🌀 Швидкість вітру: ${weatherData.speedwind}м/c \n` +
     `🪟 За вікном зараз ${weatherData.status} `
@@ -13,93 +14,66 @@ function transformStandartDataForOutputToUser(weatherData) {
 // TODO: RENAME and move to `something...`
 const getCityNameSession = async (ctx) => {
   ctx.reply('Будь ласка, напишіть назву міста');
+
   ctx.session.cityName = true;
 };
 
 const requestWeatherFromUserLocation = async (ctx) => {
   const location = ctx.message.location;
+
   const data = await getWeatherByLocation(location);
+
   ctx.reply(transformStandartDataForOutputToUser(data));
 };
 
-const requestWeatherFromUserCity = async (ctx) => {
-  console.log(ctx.message.text);
-  const cityPerChat = ctx.message.text;
-  const data = await getWeatherByCityName(cityPerChat);
+const requestWeatherFromUserCity = async ({ messageText, session }) => {
+  if (session) session.cityName = false;
 
-  ctx.session.cityName = false;
+  const data = await getWeatherByCityName(messageText);
 
   if (data.cod !== 200) {
-    ctx.reply(cityErrorMessage(data.message));
-    return;
+    return cityErrorMessage(data.message);
   }
 
-  ctx.reply(transformStandartDataForOutputToUser(data));
+  return transformStandartDataForOutputToUser(data);
 };
 
-const functionNotificated = async (ctx) => {
-  const test = ctx.message.text;
-  ctx.session.timeNotified = test;
-  console.log(ctx.session.timeNotified);
-};
+const checkedNotificatedTimeNorms = async ({ text, session }) => {
+  const date = new Date(`01/01/1970 ${text}`);
 
-function timeConverter(timeNotified) {
-  hours = Number(timeNotified[0] + timeNotified[1]);
-  minutes = Number(timeNotified[3] + timeNotified[4]);
-  const time = hours * 60 * 60 + minutes * 60;
-  console.log(timeNotified);
-  console.log(time);
-  return time;
-}
-// wtf is
-const checkedNotificatedTimeNorms = async (ctx) => {
-  let cheked = new Boolean(true);
-
-  if (ctx.message.text.length == 5) {
-    for (let i = 0; i < ctx.message.text.length; i++) {
-      // ctx.reply(ctx.message.text[i] + 'and ' + i);
-      if (isFinite(ctx.message.text[i])) {
-      } else if (ctx.message.text[i] == `:` && i == 2) {
-        // ctx.reply('it`s double dote');
-      } else {
-        ctx.reply('succses but not norm');
-        cheked = false;
-        ctx.session.notificationCheck = true;
-        break;
-      }
-    }
-  } else {
-    ctx.reply('succses but leng not 5');
-    cheked = false;
-    ctx.session.notificationCheck = true;
+  if (isNaN(date.getTime())) {
+    return 'Not valid time format. Try again';
   }
 
-  if (cheked) {
-    ctx.session.timeNotified = timeConverter(ctx.message.text);
-    // ctx.reply('write City');
-    await addCityToNotification(ctx);
-    // Ask a Question for ivan
-    // ctx.session.notificationCheck = false;
-  }
-};
-// wtf is
-const addCityToNotification = async (ctx) => {
-  ctx.reply('write City');
-  ctx.session.city = ctx.message.text;
-  ctx.session.notificationCheck = false;
+  session.timeNotified =
+    (date.getTime() - date.getTimezoneOffset() * 60 * 1000) / 1000;
+
+  session.notificationCheck = 'city';
+
+  return 'Input city name:';
 };
 
-async function notification(city) {
-  let weatherData = await getWeatherByCityName(city);
-  let message = transformStandartDataForOutputToUser(weatherData);
-  return message;
-}
+const checkedNotificatedCity = async ({ text, session }) => {
+  const data = await getWeatherByCityName(text);
+
+  if (data.cod !== 200) {
+    return 'Not valid city name! Try again';
+  }
+
+  session.timeNotifiedCity = text;
+  session.notificationCheck = null;
+
+  const timeString = new Date(session.timeNotified * 1000).toLocaleTimeString(
+    'en-GB',
+    { timeZone: 'UTC' }
+  );
+
+  return `Setted time = ${timeString}, city name = ${text}`;
+};
 
 module.exports = {
-  notification,
   checkedNotificatedTimeNorms,
-  functionNotificated,
-  timeConverter,
+  checkedNotificatedCity,
   transformStandartDataForOutputToUser,
   getCityNameSession,
   requestWeatherFromUserLocation,
