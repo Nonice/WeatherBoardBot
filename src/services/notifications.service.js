@@ -20,7 +20,7 @@ async function checkedNotificatedCity({ text, session }) {
   const data = await getWeatherByCityName(text);
 
   if (data.cod !== 200) {
-    return 'Not valid city name! Try again';
+    return 'Недійсна назва міста! Спробуйте ще раз.';
   }
 
   session.timeNotifiedCity = text;
@@ -31,7 +31,7 @@ async function checkedNotificatedCity({ text, session }) {
     { timeZone: 'UTC' }
   );
 
-  return `Setted time = ${timeString}, city name = ${text}`;
+  return `Встановлений час:${timeString}. \n Обране місто:${text}.`;
 }
 
 module.exports = {
