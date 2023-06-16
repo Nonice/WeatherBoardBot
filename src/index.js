@@ -167,7 +167,7 @@ localSession.DB.then((DB) => {
       `[CYCLE] Runned in ${new Date(timeNow * 1000).toLocaleTimeString(
         'en-GB',
         { timeZone: 'UTC' }
-      )}`
+      )} UTC`
     );
 
     sessionData.forEach(
@@ -179,7 +179,7 @@ localSession.DB.then((DB) => {
         const timeNowForCheck = timeNow + userTimezone * 60 * 60;
 
         console.log(
-          `[CYCLE] userID = ${userID}, timeNotified = ${timeNotified}, timeNotifiedCity = ${timeNotifiedCity}`
+          `[CYCLE] userID = ${userID}, timeNotified = ${timeNotified}, timeNotifiedCity = ${timeNotifiedCity}, timeNowForCheck = ${timeNowForCheck}`
         );
 
         if (
