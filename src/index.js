@@ -167,7 +167,7 @@ localSession.DB.then((DB) => {
       `[CYCLE] Runned in ${new Date(timeNow * 1000).toLocaleTimeString(
         'en-GB',
         { timeZone: 'UTC' }
-      )}`
+      )} UTC`
     );
 
     sessionData.forEach(
@@ -179,7 +179,7 @@ localSession.DB.then((DB) => {
         const timeNowForCheck = timeNow + userTimezone * 60 * 60;
 
         console.log(
-          `[CYCLE] userID = ${userID}, timeNotified = ${timeNotified}, timeNotifiedCity = ${timeNotifiedCity}`
+          `[CYCLE] userID = ${userID}, timeNotified = ${timeNotified}, timeNotifiedCity = ${timeNotifiedCity}, timeNowForCheck = ${timeNowForCheck}`
         );
 
         if (
@@ -191,13 +191,19 @@ localSession.DB.then((DB) => {
             text: timeNotifiedCity,
           });
 
-          bot.telegram.sendMessage(
-            userID,
-            `Notification by ${
-              date.getUTCHours() + userTimezone
-            }:${date.getUTCMinutes()}.
-					\n${cityWeather}`
-          );
+          const timeString = `01/01/1970 ${
+            date.getUTCHours() + userTimezone - date.getTimezoneOffset() / 60
+          }:${date.getUTCMinutes()}`;
+
+          const time = new Date(timeString).toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'UTC',
+          });
+
+          const message = `Notification by ${time}\n${cityWeather}`;
+
+          bot.telegram.sendMessage(userID, message);
         }
       }
     );
