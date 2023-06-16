@@ -28,10 +28,10 @@ const requestWeatherFromUserLocation = async (ctx) => {
   ctx.reply(transformStandartDataForOutputToUser(data));
 };
 
-const requestWeatherFromUserCity = async ({ messageText, session }) => {
+const requestWeatherFromUserCity = async ({ text, session }) => {
   if (session) session.inputState = null;
 
-  const data = await getWeatherByCityName(messageText);
+  const data = await getWeatherByCityName(text);
 
   if (data.cod !== 200) {
     return cityErrorMessage(data.message);
@@ -40,42 +40,7 @@ const requestWeatherFromUserCity = async ({ messageText, session }) => {
   return transformStandartDataForOutputToUser(data);
 };
 
-const checkedNotificatedTimeNorms = async ({ text, session }) => {
-  const date = new Date(`01/01/1970 ${text}`);
-
-  if (isNaN(date.getTime())) {
-    return 'Not valid time format. Try again';
-  }
-
-  session.timeNotified =
-    (date.getTime() - date.getTimezoneOffset() * 60 * 1000) / 1000;
-
-  session.inputState = 'notification-city';
-
-  return 'Input city name:';
-};
-
-const checkedNotificatedCity = async ({ text, session }) => {
-  const data = await getWeatherByCityName(text);
-
-  if (data.cod !== 200) {
-    return 'Not valid city name! Try again';
-  }
-
-  session.timeNotifiedCity = text;
-  session.inputState = null;
-
-  const timeString = new Date(session.timeNotified * 1000).toLocaleTimeString(
-    'en-GB',
-    { timeZone: 'UTC' }
-  );
-
-  return `Setted time = ${timeString}, city name = ${text}`;
-};
-
 module.exports = {
-  checkedNotificatedTimeNorms,
-  checkedNotificatedCity,
   transformStandartDataForOutputToUser,
   getCityNameSession,
   requestWeatherFromUserLocation,
