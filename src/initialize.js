@@ -2,23 +2,23 @@ function initializeBotCommands(telegram) {
   telegram.setMyCommands([
     {
       command: 'menu',
-      description: 'Open menu',
+      description: 'Відкрити меню',
     },
     {
       command: 'location',
-      description: 'Get weather by location',
+      description: 'Отримайте прогноз погоди за місцезнаходженням',
     },
     {
       command: 'city_name',
-      description: 'Get weather by city name',
+      description: 'Отримайте прогноз погоди за назвою міста',
     },
     {
       command: 'timezone',
-      description: 'Set own timezone',
+      description: 'Встановіть власний часовий пояс',
     },
     {
       command: 'mystats',
-      description: 'Show my stats',
+      description: 'Показати інформацію про час',
     },
   ]);
 }
