@@ -10,18 +10,6 @@ function getReplyMarkup(type = 'main') {
     };
   }
 
-  if (type === 'findBy') {
-    return {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Знайти за геолокацією', callback_data: 'GetTrack' }],
-          [{ text: 'Знайти за назвою', callback_data: 'GetData' }],
-          [{ text: ' « Back', callback_data: 'Back' }],
-        ],
-      },
-    };
-  }
-
   if (type === 'settings') {
     return {
       reply_markup: {

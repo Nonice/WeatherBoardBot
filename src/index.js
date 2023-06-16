@@ -5,19 +5,22 @@ const { message } = require('telegraf/filters');
 const LocalSession = require('telegraf-session-local');
 
 const {
-  getCityNameSession,
   requestWeatherFromUserLocation,
   requestWeatherFromUserCity,
-} = require('./helper.js');
+} = require('./services/weather.service');
+
+const {
+  checkedNotificatedTimeNorms,
+  checkedNotificatedCity,
+} = require('./services/notifications.service');
 
 const { initializeBotCommands } = require('./initialize.js');
 
 const { getReplyMarkup } = require('./services/getReplyMarkup.service.js');
 const {
   notificationComposer,
-  checkedNotificatedTimeNorms,
-  checkedNotificatedCity,
 } = require('./controllers/notifications.controller.js');
+const { weatherComposer } = require('./controllers/weather.controller');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -35,6 +38,7 @@ const localSession = new LocalSession({
 bot.use(localSession);
 
 bot.use(notificationComposer);
+bot.use(weatherComposer);
 
 const sendMenu = (ctx) => {
   ctx.replyWithHTML('Menu', getReplyMarkup('main'));
@@ -42,19 +46,6 @@ const sendMenu = (ctx) => {
 
 bot.start(sendMenu);
 bot.command('menu', sendMenu);
-
-bot.command('location', async (ctx) => {
-  // TODO: Move to func 2
-  ctx.reply('Будь ласка, надішліть свою геолокацію');
-});
-
-bot.command('city_name', getCityNameSession);
-
-bot.action('Weather', (ctx) => {
-  ctx.editMessageText('Оберіть, будь ласка, місто', getReplyMarkup('findBy'));
-
-  ctx.answerCbQuery();
-});
 
 bot.action('Settings', (ctx) => {
   ctx.editMessageText('Settings', getReplyMarkup('settings'));
@@ -70,15 +61,6 @@ bot.action('BackToMenu', async (ctx) => {
 
 bot.action('Back', async (ctx) => {
   ctx.editMessageText('Menu', getReplyMarkup('main'));
-
-  ctx.answerCbQuery();
-});
-
-bot.action('GetData', getCityNameSession);
-
-bot.action('GetTrack', (ctx) => {
-  // TODO: Move to func 2
-  ctx.reply('Будь ласка, надішліть свою геолокацію');
 
   ctx.answerCbQuery();
 });
