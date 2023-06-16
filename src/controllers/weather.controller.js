@@ -16,6 +16,11 @@ const getCityNameSession = async (ctx) => {
   ctx.answerCbQuery();
 };
 
+const getLocationSession = async (ctx) => {
+  ctx.reply(SENG_LOCATION_MESSAGE);
+  ctx.answerCbQuery();
+};
+
 function getWeatherMenu() {
   return {
     reply_markup: {
@@ -46,16 +51,10 @@ weatherComposer.action(WEATHER_MENU_ACTION, (ctx) => {
 });
 
 weatherComposer.command('city_name', getCityNameSession);
-weatherComposer.command('location', async (ctx) => {
-  ctx.reply(SENG_LOCATION_MESSAGE);
-});
-
-weatherComposer.action(WEATHER_GET_BY_LOCATION_ACTION, (ctx) => {
-  ctx.reply(SENG_LOCATION_MESSAGE);
-  ctx.answerCbQuery();
-});
+weatherComposer.command('location', getLocationSession);
 
 weatherComposer.action(WEATHER_GET_BY_NAME_ACTION, getCityNameSession);
+weatherComposer.action(WEATHER_GET_BY_LOCATION_ACTION, getLocationSession);
 
 module.exports = {
   weatherComposer,

@@ -58,12 +58,6 @@ notificationComposer.action(DELETE_NOTIFICATION_ACTION, (ctx) => {
   ctx.answerCbQuery();
 });
 
-notificationComposer.action(BACK_TO_SETTINGS_ACTION, async (ctx) => {
-  ctx.editMessageText('Menu', getReplyMarkup('settings'));
-
-  ctx.answerCbQuery();
-});
-
 notificationComposer.action(SETTINGS_NOTIFICATION_MENU_ACTION, (ctx) => {
   ctx.editMessageText('Notification', getNotificationMenu());
 
