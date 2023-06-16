@@ -56,6 +56,47 @@ bot.use(notificationComposer);
 bot.use(weatherComposer);
 bot.use(timezoneComposer);
 
+bot.command('mystats', (ctx) => {
+  const timezone = ctx.session.timezone || 0;
+
+  const timeNotifiedLocalDate = new Date(ctx.session.timeNotified * 1000);
+
+  let timeNotifiedLocal = '-';
+
+  if (
+    ctx.session.timeNotified !== null &&
+    !isNaN(timeNotifiedLocalDate.getTime())
+  ) {
+    timeNotifiedLocal = timeNotifiedLocalDate.toLocaleTimeString('en-GB', {
+      timeZone: 'UTC',
+    });
+  }
+
+  const timeNotifiedUTCDate = new Date(
+    ctx.session.timeNotified * 1000 - timezone * 60 * 60 * 1000
+  );
+
+  let timeNotifiedUTC = '-';
+
+  if (
+    ctx.session.timeNotified !== null &&
+    !isNaN(timeNotifiedUTCDate.getTime())
+  ) {
+    timeNotifiedUTC = timeNotifiedUTCDate.toLocaleTimeString('en-GB', {
+      timeZone: 'UTC',
+    });
+  }
+
+  ctx.reply(
+    `User stats:\n` +
+      `Notification:\n` +
+      `Notification time = ${timeNotifiedUTC} UTC\n` +
+      `Notification time = ${timeNotifiedLocal} local\n` +
+      `Notification city = ${ctx.session.timeNotifiedCity || '-'}\n` +
+      `Timezone = ${timezone}\n`
+  );
+});
+
 const sendMenu = (ctx) => {
   ctx.replyWithHTML('Menu', getReplyMarkup('main'));
 };

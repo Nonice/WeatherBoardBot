@@ -16,6 +16,10 @@ function initializeBotCommands(telegram) {
       command: 'timezone',
       description: 'Set own timezone',
     },
+    {
+      command: 'mystats',
+      description: 'Show my stats',
+    },
   ]);
 }
 
