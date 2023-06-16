@@ -16,7 +16,7 @@ const {
 
 // TODO: Moved `example_db.json` to config
 const localSession = new LocalSession({
-  database: 'example_db.json',
+  database: 'session-store.json',
   property: 'session',
   storage: LocalSession.storageFileAsync,
   format: {
@@ -29,7 +29,7 @@ const localSession = new LocalSession({
 bot.use(localSession);
 
 bot.start((ctx) => {
-  ctx.replyWithHTML('⠀⠀⠀⠀⠀⠀Menu', {
+  ctx.replyWithHTML('Menu', {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Weather', callback_data: 'Weather' }],
@@ -82,6 +82,8 @@ bot.action('Weather', (ctx) => {
       ],
     },
   });
+
+  ctx.answerCbQuery();
 });
 
 bot.action('Settings', (ctx) => {
@@ -93,6 +95,8 @@ bot.action('Settings', (ctx) => {
       ],
     },
   });
+
+  ctx.answerCbQuery();
 });
 
 bot.action('NotiMenu', (ctx) => {
@@ -105,21 +109,26 @@ bot.action('NotiMenu', (ctx) => {
       ],
     },
   });
+
+  ctx.answerCbQuery();
 });
 
-// telegram id
 bot.action('addNotification', (ctx) => {
-  ctx.session.notificationCheck = 'time';
+  ctx.session.inputState = 'notification-time';
   ctx.session.userID = ctx.from.id;
   ctx.reply('Enter time on notification(example 20:00): ');
+
+  ctx.answerCbQuery();
 });
 
-// telegram id
 bot.action('deleteNotification', (ctx) => {
-  ctx.session.notificationCheck = false;
+  ctx.session.inputState = null;
   ctx.session.timeNotified = null;
   ctx.session.timeNotifiedCity = null;
+
   ctx.reply('Notification has been deleted');
+
+  ctx.answerCbQuery();
 });
 
 bot.action('BackToMenu', async (ctx) => {
@@ -131,6 +140,8 @@ bot.action('BackToMenu', async (ctx) => {
       ],
     },
   });
+
+  ctx.answerCbQuery();
 });
 
 bot.action('Back', async (ctx) => {
@@ -142,6 +153,8 @@ bot.action('Back', async (ctx) => {
       ],
     },
   });
+
+  ctx.answerCbQuery();
 });
 
 bot.action('GetData', getCityNameSession);
@@ -149,12 +162,14 @@ bot.action('GetData', getCityNameSession);
 bot.action('GetTrack', (ctx) => {
   // TODO: Move to func 2
   ctx.reply('Будь ласка, надішліть свою геолокацію');
+
+  ctx.answerCbQuery();
 });
 
 bot.on(message('location'), requestWeatherFromUserLocation);
 
 bot.on(message('text'), async (ctx) => {
-  if (ctx.session.cityName) {
+  if (ctx.session.inputState === 'cityname') {
     ctx.reply(
       await requestWeatherFromUserCity({
         messageText: ctx.message.text,
@@ -164,7 +179,7 @@ bot.on(message('text'), async (ctx) => {
     return;
   }
 
-  if (ctx.session.notificationCheck === 'time') {
+  if (ctx.session.inputState === 'notification-time') {
     ctx.reply(
       await checkedNotificatedTimeNorms({
         text: ctx.message.text,
@@ -174,7 +189,7 @@ bot.on(message('text'), async (ctx) => {
     return;
   }
 
-  if (ctx.session.notificationCheck === 'city') {
+  if (ctx.session.inputState === 'notification-city') {
     ctx.reply(
       await checkedNotificatedCity({
         text: ctx.message.text,

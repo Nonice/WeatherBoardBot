@@ -15,7 +15,9 @@ function transformStandartDataForOutputToUser(weatherData) {
 const getCityNameSession = async (ctx) => {
   ctx.reply('Будь ласка, напишіть назву міста');
 
-  ctx.session.cityName = true;
+  ctx.session.inputState = 'cityname';
+
+  ctx.answerCbQuery();
 };
 
 const requestWeatherFromUserLocation = async (ctx) => {
@@ -27,7 +29,7 @@ const requestWeatherFromUserLocation = async (ctx) => {
 };
 
 const requestWeatherFromUserCity = async ({ messageText, session }) => {
-  if (session) session.cityName = false;
+  if (session) session.inputState = null;
 
   const data = await getWeatherByCityName(messageText);
 
@@ -48,7 +50,7 @@ const checkedNotificatedTimeNorms = async ({ text, session }) => {
   session.timeNotified =
     (date.getTime() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 
-  session.notificationCheck = 'city';
+  session.inputState = 'notification-city';
 
   return 'Input city name:';
 };
@@ -61,7 +63,7 @@ const checkedNotificatedCity = async ({ text, session }) => {
   }
 
   session.timeNotifiedCity = text;
-  session.notificationCheck = null;
+  session.inputState = null;
 
   const timeString = new Date(session.timeNotified * 1000).toLocaleTimeString(
     'en-GB',
