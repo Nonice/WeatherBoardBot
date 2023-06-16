@@ -31,20 +31,20 @@ const notificationComposer = new Composer();
 
 notificationComposer.action(ADD_NOTIFICATION_ACTION, (ctx) => {
   if (ctx.chat.id < 0) {
-    ctx.reply('Add notification not working in groups!');
+    ctx.reply('Додати повідомлення не працює в групах!');
     ctx.answerCbQuery();
     return;
   }
 
   ctx.session.inputState = INPUT_STATE_NOTIFICATIONS_TIME;
   ctx.session.userID = ctx.from.id;
-  ctx.reply('Enter time on notification(example 20:00): ');
+  ctx.reply('Введіть час сповіщення. (наприклад 20:00): ');
   ctx.answerCbQuery();
 });
 
 notificationComposer.action(DELETE_NOTIFICATION_ACTION, (ctx) => {
   if (ctx.chat.id < 0) {
-    ctx.reply('Delete notification not working in groups!');
+    ctx.reply('Видалення сповіщень не працює в групах!');
     ctx.answerCbQuery();
     return;
   }
@@ -53,7 +53,7 @@ notificationComposer.action(DELETE_NOTIFICATION_ACTION, (ctx) => {
   ctx.session.timeNotified = null;
   ctx.session.timeNotifiedCity = null;
 
-  ctx.reply('Notification has been deleted');
+  ctx.reply('Сповіщення видалено.');
 
   ctx.answerCbQuery();
 });
