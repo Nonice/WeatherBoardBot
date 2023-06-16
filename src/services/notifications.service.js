@@ -31,7 +31,7 @@ async function checkedNotificatedCity({ text, session }) {
     { timeZone: 'UTC' }
   );
 
-  return `Встановлений час:${timeString}. \n Обране місто:${text}.`;
+  return `Встановлений час:${timeString}. \nОбране місто:${text}.`;
 }
 
 module.exports = {
