@@ -37,7 +37,7 @@ function getWeatherMenu() {
             callback_data: WEATHER_GET_BY_NAME_ACTION,
           },
         ],
-        [{ text: ' « Back', callback_data: BACK_ACTION }],
+        [{ text: ' « Повернутися', callback_data: BACK_ACTION }],
       ],
     },
   };
@@ -46,7 +46,7 @@ function getWeatherMenu() {
 const weatherComposer = new Composer();
 
 weatherComposer.action(WEATHER_MENU_ACTION, (ctx) => {
-  ctx.editMessageText('Оберіть, будь ласка, місто', getWeatherMenu());
+  ctx.editMessageText('Оберіть спосіб', getWeatherMenu());
   ctx.answerCbQuery();
 });
 

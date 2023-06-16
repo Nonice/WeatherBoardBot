@@ -14,14 +14,14 @@ function getNotificationMenu() {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Add Notification', callback_data: ADD_NOTIFICATION_ACTION }],
+        [{ text: 'Додати сповіщення', callback_data: ADD_NOTIFICATION_ACTION }],
         [
           {
-            text: 'Delete Notification',
+            text: 'Видалити сповіщення',
             callback_data: DELETE_NOTIFICATION_ACTION,
           },
         ],
-        [{ text: ' « Back', callback_data: BACK_TO_SETTINGS_ACTION }],
+        [{ text: ' « Повернутися', callback_data: BACK_TO_SETTINGS_ACTION }],
       ],
     },
   };
@@ -59,7 +59,7 @@ notificationComposer.action(DELETE_NOTIFICATION_ACTION, (ctx) => {
 });
 
 notificationComposer.action(SETTINGS_NOTIFICATION_MENU_ACTION, (ctx) => {
-  ctx.editMessageText('Notification', getNotificationMenu());
+  ctx.editMessageText('Сповіщення', getNotificationMenu());
 
   ctx.answerCbQuery();
 });

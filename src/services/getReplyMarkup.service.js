@@ -10,8 +10,8 @@ function getReplyMarkup(type = 'main') {
     return {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Weather', callback_data: WEATHER_MENU_ACTION }],
-          [{ text: 'Settings', callback_data: SETTINGS_MENU_ACTION }],
+          [{ text: 'Погода', callback_data: WEATHER_MENU_ACTION }],
+          [{ text: 'Налаштування', callback_data: SETTINGS_MENU_ACTION }],
         ],
       },
     };
@@ -23,11 +23,11 @@ function getReplyMarkup(type = 'main') {
         inline_keyboard: [
           [
             {
-              text: 'Notification',
+              text: 'Сповіщення',
               callback_data: SETTINGS_NOTIFICATION_MENU_ACTION,
             },
           ],
-          [{ text: ' « Back', callback_data: BACK_ACTION }],
+          [{ text: ' « Повернутися', callback_data: BACK_ACTION }],
         ],
       },
     };

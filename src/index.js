@@ -98,26 +98,26 @@ bot.command('mystats', (ctx) => {
 });
 
 const sendMenu = (ctx) => {
-  ctx.replyWithHTML('Menu', getReplyMarkup('main'));
+  ctx.replyWithHTML('Меню', getReplyMarkup('main'));
 };
 
 bot.start(sendMenu);
 bot.command('menu', sendMenu);
 
 bot.action(SETTINGS_MENU_ACTION, (ctx) => {
-  ctx.editMessageText('Settings', getReplyMarkup('settings'));
+  ctx.editMessageText('Налаштування', getReplyMarkup('settings'));
 
   ctx.answerCbQuery();
 });
 
 bot.action(BACK_TO_SETTINGS_ACTION, async (ctx) => {
-  ctx.editMessageText('Menu', getReplyMarkup('settings'));
+  ctx.editMessageText('Меню', getReplyMarkup('settings'));
 
   ctx.answerCbQuery();
 });
 
 bot.action(BACK_ACTION, async (ctx) => {
-  ctx.editMessageText('Menu', getReplyMarkup('main'));
+  ctx.editMessageText('Меню', getReplyMarkup('main'));
 
   ctx.answerCbQuery();
 });
