@@ -1,23 +1,26 @@
 const { Composer } = require('telegraf');
 
 const { getReplyMarkup } = require('../services/getReplyMarkup.service');
+const {
+  BACK_TO_SETTINGS_ACTION,
+  SETTINGS_NOTIFICATION_MENU_ACTION,
+} = require('../config/actions');
 
-const BACK_TO_SETTINGS = 'BackToMenu';
-const ADD_NOTIFICATION = 'ADD_NOTIFICATION';
-const DELETE_NOTIFICATION = 'DELETE_NOTIFICATION';
+const ADD_NOTIFICATION_ACTION = 'ADD_NOTIFICATION';
+const DELETE_NOTIFICATION_ACTION = 'DELETE_NOTIFICATION';
 
 function getNotificationMenu() {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Add Notification', callback_data: ADD_NOTIFICATION }],
+        [{ text: 'Add Notification', callback_data: ADD_NOTIFICATION_ACTION }],
         [
           {
             text: 'Delete Notification',
-            callback_data: DELETE_NOTIFICATION,
+            callback_data: DELETE_NOTIFICATION_ACTION,
           },
         ],
-        [{ text: ' « Back', callback_data: BACK_TO_SETTINGS }],
+        [{ text: ' « Back', callback_data: BACK_TO_SETTINGS_ACTION }],
       ],
     },
   };
@@ -25,7 +28,7 @@ function getNotificationMenu() {
 
 const notificationComposer = new Composer();
 
-notificationComposer.action(ADD_NOTIFICATION, (ctx) => {
+notificationComposer.action(ADD_NOTIFICATION_ACTION, (ctx) => {
   if (ctx.chat.id < 0) {
     ctx.reply('Add notification not working in groups!');
     ctx.answerCbQuery();
@@ -38,7 +41,7 @@ notificationComposer.action(ADD_NOTIFICATION, (ctx) => {
   ctx.answerCbQuery();
 });
 
-notificationComposer.action(DELETE_NOTIFICATION, (ctx) => {
+notificationComposer.action(DELETE_NOTIFICATION_ACTION, (ctx) => {
   if (ctx.chat.id < 0) {
     ctx.reply('Delete notification not working in groups!');
     ctx.answerCbQuery();
@@ -60,7 +63,7 @@ notificationComposer.action(BACK_TO_SETTINGS, async (ctx) => {
   ctx.answerCbQuery();
 });
 
-notificationComposer.action('NotificationMenu', (ctx) => {
+notificationComposer.action(SETTINGS_NOTIFICATION_MENU_ACTION, (ctx) => {
   ctx.editMessageText('Notification', getNotificationMenu());
 
   ctx.answerCbQuery();

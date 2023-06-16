@@ -21,6 +21,11 @@ const {
   notificationComposer,
 } = require('./controllers/notifications.controller.js');
 const { weatherComposer } = require('./controllers/weather.controller');
+const {
+  BACK_TO_SETTINGS_ACTION,
+  BACK_ACTION,
+  SETTINGS_MENU_ACTION,
+} = require('./config/actions');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -47,19 +52,19 @@ const sendMenu = (ctx) => {
 bot.start(sendMenu);
 bot.command('menu', sendMenu);
 
-bot.action('Settings', (ctx) => {
+bot.action(SETTINGS_MENU_ACTION, (ctx) => {
   ctx.editMessageText('Settings', getReplyMarkup('settings'));
 
   ctx.answerCbQuery();
 });
 
-bot.action('BackToMenu', async (ctx) => {
+bot.action(BACK_TO_SETTINGS_ACTION, async (ctx) => {
   ctx.editMessageText('Menu', getReplyMarkup('settings'));
 
   ctx.answerCbQuery();
 });
 
-bot.action('Back', async (ctx) => {
+bot.action(BACK_ACTION, async (ctx) => {
   ctx.editMessageText('Menu', getReplyMarkup('main'));
 
   ctx.answerCbQuery();
