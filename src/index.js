@@ -88,12 +88,12 @@ bot.command('mystats', (ctx) => {
   }
 
   ctx.reply(
-    `User stats:\n` +
-      `Notification:\n` +
-      `Notification time = ${timeNotifiedUTC} UTC\n` +
-      `Notification time = ${timeNotifiedLocal} local\n` +
-      `Notification city = ${ctx.session.timeNotifiedCity || '-'}\n` +
-      `Timezone = ${timezone}\n`
+    `Дані Користувача:\n` +
+      `Сповіщення:\n` +
+      `Час сповіщення(UTC):${timeNotifiedUTC} UTC\n` +
+      `Час сповіщення:${timeNotifiedLocal} local\n` +
+      `Обране місто:${ctx.session.timeNotifiedCity || '-'}\n` +
+      `Часовий пояс:${timezone}\n`
   );
 });
 
@@ -193,7 +193,7 @@ localSession.DB.then((DB) => {
 
           bot.telegram.sendMessage(
             userID,
-            `Notification by ${
+            `Сповіщення: ${
               date.getUTCHours() + userTimezone
             }:${date.getUTCMinutes()}.
 					\n${cityWeather}`

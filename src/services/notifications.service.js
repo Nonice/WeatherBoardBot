@@ -5,7 +5,7 @@ async function checkedNotificatedTimeNorms({ text, session }) {
   const date = new Date(`01/01/1970 ${text}`);
 
   if (isNaN(date.getTime())) {
-    return 'Not valid time format. Try again';
+    return 'Недійсний формат часу.Спробуйте ще раз.';
   }
 
   session.timeNotified =
