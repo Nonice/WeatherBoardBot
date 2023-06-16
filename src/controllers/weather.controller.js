@@ -1,5 +1,6 @@
 const { Composer } = require('telegraf');
 const { BACK_ACTION, WEATHER_MENU_ACTION } = require('../config/actions');
+const { INPUT_STATE_CITY_NAME } = require('../config/inputState');
 
 const WEATHER_GET_BY_LOCATION_ACTION = 'WEATHER_GET_BY_LOCATION';
 const WEATHER_GET_BY_NAME_ACTION = 'WEATHER_GET_BY_NAME';
@@ -10,7 +11,7 @@ const SENG_CITY_NAME_MESSAGE = 'Будь ласка, напишіть назву
 const getCityNameSession = async (ctx) => {
   ctx.reply(SENG_CITY_NAME_MESSAGE);
 
-  ctx.session.inputState = 'cityname';
+  ctx.session.inputState = INPUT_STATE_CITY_NAME;
 
   ctx.answerCbQuery();
 };

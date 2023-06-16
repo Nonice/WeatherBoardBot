@@ -1,4 +1,5 @@
 const { getWeatherByCityName } = require('../api/api');
+const { INPUT_STATE_NOTIFICATIONS_CITY } = require('../config/inputState');
 
 async function checkedNotificatedTimeNorms({ text, session }) {
   const date = new Date(`01/01/1970 ${text}`);
@@ -10,7 +11,7 @@ async function checkedNotificatedTimeNorms({ text, session }) {
   session.timeNotified =
     (date.getTime() - date.getTimezoneOffset() * 60 * 1000) / 1000;
 
-  session.inputState = 'notification-city';
+  session.inputState = INPUT_STATE_NOTIFICATIONS_CITY;
 
   return 'Input city name:';
 }

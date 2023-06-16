@@ -5,6 +5,7 @@ const {
   BACK_TO_SETTINGS_ACTION,
   SETTINGS_NOTIFICATION_MENU_ACTION,
 } = require('../config/actions');
+const { INPUT_STATE_NOTIFICATIONS_TIME } = require('../config/inputState');
 
 const ADD_NOTIFICATION_ACTION = 'ADD_NOTIFICATION';
 const DELETE_NOTIFICATION_ACTION = 'DELETE_NOTIFICATION';
@@ -35,7 +36,7 @@ notificationComposer.action(ADD_NOTIFICATION_ACTION, (ctx) => {
     return;
   }
 
-  ctx.session.inputState = 'notification-time';
+  ctx.session.inputState = INPUT_STATE_NOTIFICATIONS_TIME;
   ctx.session.userID = ctx.from.id;
   ctx.reply('Enter time on notification(example 20:00): ');
   ctx.answerCbQuery();
@@ -57,7 +58,7 @@ notificationComposer.action(DELETE_NOTIFICATION_ACTION, (ctx) => {
   ctx.answerCbQuery();
 });
 
-notificationComposer.action(BACK_TO_SETTINGS, async (ctx) => {
+notificationComposer.action(BACK_TO_SETTINGS_ACTION, async (ctx) => {
   ctx.editMessageText('Menu', getReplyMarkup('settings'));
 
   ctx.answerCbQuery();

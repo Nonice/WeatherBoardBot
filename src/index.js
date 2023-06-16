@@ -26,6 +26,11 @@ const {
   BACK_ACTION,
   SETTINGS_MENU_ACTION,
 } = require('./config/actions');
+const {
+  INPUT_STATE_CITY_NAME,
+  INPUT_STATE_NOTIFICATIONS_TIME,
+  INPUT_STATE_NOTIFICATIONS_CITY,
+} = require('./config/inputState');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -79,17 +84,17 @@ bot.on(message('text'), async (ctx) => {
   };
 
   switch (ctx.session.inputState) {
-    case 'cityname': {
+    case INPUT_STATE_CITY_NAME: {
       ctx.reply(await requestWeatherFromUserCity(functionsInput));
       break;
     }
 
-    case 'notification-time': {
+    case INPUT_STATE_NOTIFICATIONS_TIME: {
       ctx.reply(await checkedNotificatedTimeNorms(functionsInput));
       break;
     }
 
-    case 'notification-city': {
+    case INPUT_STATE_NOTIFICATIONS_CITY: {
       ctx.reply(await checkedNotificatedCity(functionsInput));
       break;
     }
@@ -100,19 +105,28 @@ initializeBotCommands(bot.telegram);
 bot.launch();
 
 localSession.DB.then((DB) => {
-  setTimeout(() => {
+  setInterval(() => {
     console.log(DB.get('sessions').value());
     const sessionData = DB.get('sessions').value();
     const date = new Date();
 
     let timeNow = date.getUTCHours() * 60 * 60 + date.getUTCMinutes() * 60;
 
+    console.log(`[CYCLE] Runned in ${timeNow}`);
+
     sessionData.forEach(
       async ({ data: { timeNotified, userID, timeNotifiedCity } }) => {
-        console.log(timeNotified, timeNow, timeNotifiedCity);
-        if (timeNotified == timeNow) {
+        console.log(
+          `[CYCLE] userID = ${userID}, timeNotified = ${timeNotified}, timeNotifiedCity = ${timeNotifiedCity}`
+        );
+
+        if (
+          timeNotified == timeNow &&
+          timeNotifiedCity !== undefined &&
+          userID !== undefined
+        ) {
           const cityWeather = await requestWeatherFromUserCity({
-            messageText: timeNotifiedCity,
+            text: timeNotifiedCity,
           });
 
           bot.telegram.sendMessage(
@@ -123,5 +137,5 @@ localSession.DB.then((DB) => {
         }
       }
     );
-  }, 1000);
+  }, 60000);
 });
