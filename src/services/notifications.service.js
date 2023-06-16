@@ -13,7 +13,7 @@ async function checkedNotificatedTimeNorms({ text, session }) {
 
   session.inputState = INPUT_STATE_NOTIFICATIONS_CITY;
 
-  return 'Input city name:';
+  return 'Введіть назву міста:';
 }
 
 async function checkedNotificatedCity({ text, session }) {
