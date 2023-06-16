@@ -26,11 +26,16 @@ const {
   BACK_ACTION,
   SETTINGS_MENU_ACTION,
 } = require('./config/actions');
+
 const {
   INPUT_STATE_CITY_NAME,
   INPUT_STATE_NOTIFICATIONS_TIME,
   INPUT_STATE_NOTIFICATIONS_CITY,
+  INPUT_STATE_TIMEZONE,
 } = require('./config/inputState');
+
+const { checkedTimezone } = require('./services/timezone.service');
+const { timezoneComposer } = require('./controllers/timezone.controller');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -49,6 +54,7 @@ bot.use(localSession);
 
 bot.use(notificationComposer);
 bot.use(weatherComposer);
+bot.use(timezoneComposer);
 
 const sendMenu = (ctx) => {
   ctx.replyWithHTML('Menu', getReplyMarkup('main'));
@@ -98,6 +104,11 @@ bot.on(message('text'), async (ctx) => {
       ctx.reply(await checkedNotificatedCity(functionsInput));
       break;
     }
+
+    case INPUT_STATE_TIMEZONE: {
+      ctx.reply(await checkedTimezone(functionsInput));
+      break;
+    }
   }
 });
 
@@ -106,22 +117,32 @@ bot.launch();
 
 localSession.DB.then((DB) => {
   setInterval(() => {
-    console.log(DB.get('sessions').value());
     const sessionData = DB.get('sessions').value();
     const date = new Date();
 
-    let timeNow = date.getUTCHours() * 60 * 60 + date.getUTCMinutes() * 60;
+    const timeNow = date.getUTCHours() * 60 * 60 + date.getUTCMinutes() * 60;
 
-    console.log(`[CYCLE] Runned in ${timeNow}`);
+    console.log(
+      `[CYCLE] Runned in ${new Date(timeNow * 1000).toLocaleTimeString(
+        'en-GB',
+        { timeZone: 'UTC' }
+      )}`
+    );
 
     sessionData.forEach(
-      async ({ data: { timeNotified, userID, timeNotifiedCity } }) => {
+      async ({
+        data: { timeNotified, userID, timeNotifiedCity, timezone },
+      }) => {
+        const userTimezone = timezone || 0;
+
+        const timeNowForCheck = timeNow + userTimezone * 60 * 60;
+
         console.log(
           `[CYCLE] userID = ${userID}, timeNotified = ${timeNotified}, timeNotifiedCity = ${timeNotifiedCity}`
         );
 
         if (
-          timeNotified == timeNow &&
+          timeNotified == timeNowForCheck &&
           timeNotifiedCity !== undefined &&
           userID !== undefined
         ) {
@@ -131,7 +152,9 @@ localSession.DB.then((DB) => {
 
           bot.telegram.sendMessage(
             userID,
-            `Notification by ${date.getUTCHours()}:${date.getUTCMinutes()} UTC.
+            `Notification by ${
+              date.getUTCHours() + userTimezone
+            }:${date.getUTCMinutes()}.
 					\n${cityWeather}`
           );
         }

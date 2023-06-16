@@ -2,15 +2,19 @@ function initializeBotCommands(telegram) {
   telegram.setMyCommands([
     {
       command: 'menu',
-      description: 'menu',
+      description: 'Open menu',
     },
     {
       command: 'location',
-      description: 'menu',
+      description: 'Get weather by location',
     },
     {
       command: 'city_name',
-      description: 'menu',
+      description: 'Get weather by city name',
+    },
+    {
+      command: 'timezone',
+      description: 'Set own timezone',
     },
   ]);
 }
