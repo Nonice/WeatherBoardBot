@@ -20,7 +20,7 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "example_db.json"
+      "session-store.json"
     ]
   }
 }

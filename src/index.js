@@ -4,199 +4,202 @@ const { Telegraf } = require('telegraf');
 const { message } = require('telegraf/filters');
 const LocalSession = require('telegraf-session-local');
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
-
 const {
-  addCityToNotification,
-  notification,
-  functionNotificated,
-  checkedNotificatedTimeNorms,
-  timeConverter,
-  transformStandartDataForOutputToUser,
-  getCityNameSession,
   requestWeatherFromUserLocation,
   requestWeatherFromUserCity,
-} = require('./helper.js');
-const { isCityName } = require('./middlewares/isCityName.middleware');
-const { isNotification } = require('./middlewares/isNotification.middleware');
+} = require('./services/weather.service');
 
-// TODO: Moved `example_db.json` to config
+const {
+  checkedNotificatedTimeNorms,
+  checkedNotificatedCity,
+} = require('./services/notifications.service');
+
+const { initializeBotCommands } = require('./initialize.js');
+
+const { getReplyMarkup } = require('./services/getReplyMarkup.service.js');
+const {
+  notificationComposer,
+} = require('./controllers/notifications.controller.js');
+const { weatherComposer } = require('./controllers/weather.controller');
+const {
+  BACK_TO_SETTINGS_ACTION,
+  BACK_ACTION,
+  SETTINGS_MENU_ACTION,
+} = require('./config/actions');
+
+const {
+  INPUT_STATE_CITY_NAME,
+  INPUT_STATE_NOTIFICATIONS_TIME,
+  INPUT_STATE_NOTIFICATIONS_CITY,
+  INPUT_STATE_TIMEZONE,
+} = require('./config/inputState');
+
+const { checkedTimezone } = require('./services/timezone.service');
+const { timezoneComposer } = require('./controllers/timezone.controller');
+
+const bot = new Telegraf(process.env.BOT_TOKEN);
+
 const localSession = new LocalSession({
-  database: 'example_db.json',
+  database: 'session-store.json',
   property: 'session',
   storage: LocalSession.storageFileAsync,
   format: {
     serialize: (obj) => JSON.stringify(obj, null, 2),
     deserialize: (str) => JSON.parse(str),
   },
-  state: { messages: [] },
+  state: {},
 });
 
 bot.use(localSession);
 
-// bot.use(new LocalSession({ database: 'example_db.json' }).middleware());
+bot.use(notificationComposer);
+bot.use(weatherComposer);
+bot.use(timezoneComposer);
 
-bot.start((ctx) => {
-  ctx.replyWithHTML('⠀⠀⠀⠀⠀⠀Menu', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Weather', callback_data: 'Weather' }],
-        [{ text: 'Settings', callback_data: 'Settings' }],
-      ],
-    },
-  });
+bot.command('mystats', (ctx) => {
+  const timezone = ctx.session.timezone || 0;
+
+  const timeNotifiedLocalDate = new Date(ctx.session.timeNotified * 1000);
+
+  let timeNotifiedLocal = '-';
+
+  if (
+    ctx.session.timeNotified !== null &&
+    !isNaN(timeNotifiedLocalDate.getTime())
+  ) {
+    timeNotifiedLocal = timeNotifiedLocalDate.toLocaleTimeString('en-GB', {
+      timeZone: 'UTC',
+    });
+  }
+
+  const timeNotifiedUTCDate = new Date(
+    ctx.session.timeNotified * 1000 - timezone * 60 * 60 * 1000
+  );
+
+  let timeNotifiedUTC = '-';
+
+  if (
+    ctx.session.timeNotified !== null &&
+    !isNaN(timeNotifiedUTCDate.getTime())
+  ) {
+    timeNotifiedUTC = timeNotifiedUTCDate.toLocaleTimeString('en-GB', {
+      timeZone: 'UTC',
+    });
+  }
+
+  ctx.reply(
+    `Дані Користувача:\n` +
+      `Сповіщення:\n` +
+      `Час сповіщення(UTC):${timeNotifiedUTC} UTC\n` +
+      `Час сповіщення:${timeNotifiedLocal} local\n` +
+      `Обране місто:${ctx.session.timeNotifiedCity || '-'}\n` +
+      `Часовий пояс:${timezone}\n`
+  );
 });
 
-bot.telegram.setMyCommands([
-  {
-    command: 'menu',
-    description: 'menu',
-  },
-  {
-    command: 'location',
-    description: 'menu',
-  },
-  {
-    command: 'city_name',
-    description: 'menu',
-  },
-]);
+const sendMenu = (ctx) => {
+  ctx.replyWithHTML('Меню', getReplyMarkup('main'));
+};
 
-bot.command('menu', (ctx) => {
-  ctx.replyWithHTML('⠀⠀⠀⠀⠀Menu', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Weather', callback_data: 'Weather' }],
-        [{ text: 'Settings', callback_data: 'Settings' }],
-      ],
-    },
-  });
+bot.start(sendMenu);
+bot.command('menu', sendMenu);
+
+bot.action(SETTINGS_MENU_ACTION, (ctx) => {
+  ctx.editMessageText('Налаштування', getReplyMarkup('settings'));
+
+  ctx.answerCbQuery();
 });
 
-bot.command('location', async (ctx) => {
-  // TODO: Move to func 2
-  ctx.reply('Будь ласка, надішліть свою геолокацію');
+bot.action(BACK_TO_SETTINGS_ACTION, async (ctx) => {
+  ctx.editMessageText('Меню', getReplyMarkup('settings'));
+
+  ctx.answerCbQuery();
 });
 
-bot.command('city_name', getCityNameSession);
+bot.action(BACK_ACTION, async (ctx) => {
+  ctx.editMessageText('Меню', getReplyMarkup('main'));
 
-bot.action('Weather', (ctx) => {
-  ctx.editMessageText(' Оберіть, будь ласка, місто ', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Знайти за геолокацією', callback_data: 'GetTrack' }],
-        [{ text: 'Знайти за назвою', callback_data: 'GetData' }],
-        [{ text: ' « Back', callback_data: 'Back' }],
-      ],
-    },
-  });
-});
-
-bot.action('Settings', (ctx) => {
-  ctx.editMessageText(' Settings ', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Notification', callback_data: 'NotiMenu' }],
-        [{ text: ' « Back', callback_data: 'Back' }],
-      ],
-    },
-  });
-});
-
-bot.action('NotiMenu', (ctx) => {
-  ctx.editMessageText(' Notification ', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Add Notification', callback_data: 'addNotification' }],
-        [{ text: 'Delete Notification', callback_data: 'deletNotification' }],
-        [{ text: ' « Back', callback_data: 'BackToMenu' }],
-      ],
-    },
-  });
-});
-
-// telegram id
-bot.action('addNotification', (ctx) => {
-  ctx.session.notificationCheck = true;
-  ctx.session.userID = ctx.from.id;
-  ctx.reply('write time pls {exsemple 20:00}');
-  // timeConverter(ctx.session.timeNotified);
-});
-
-// telegram id
-bot.action('deletNotification', (ctx) => {
-  ctx.session.notificationCheck = false;
-  ctx.session.timeNotified = null;
-  ctx.reply('notions deleted');
-  // timeConverter(ctx.session.timeNotified);
-});
-
-bot.action('BackToMenu', async (ctx) => {
-  ctx.editMessageText(' Menu ', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Notification', callback_data: 'NotiMenu' }],
-        [{ text: ' « Back', callback_data: 'Back' }],
-      ],
-    },
-  });
-});
-
-bot.action('Back', async (ctx) => {
-  ctx.editMessageText(' Menu ', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Weather', callback_data: 'Weather' }],
-        [{ text: 'Settings', callback_data: 'Settings' }],
-      ],
-    },
-  });
-});
-
-bot.action('GetData', getCityNameSession);
-
-bot.action('GetTrack', (ctx) => {
-  // TODO: Move to func 2
-  ctx.reply('Будь ласка, надішліть свою геолокацію');
+  ctx.answerCbQuery();
 });
 
 bot.on(message('location'), requestWeatherFromUserLocation);
 
-// bot.on(message('text'), isCityName, requestWeatherFromUserCity);
+bot.on(message('text'), async (ctx) => {
+  const functionsInput = {
+    text: ctx.message.text,
+    session: ctx.session,
+  };
 
-// isNotification;
-// bot.on(message('text'), isNotification, functionNotificated);
+  switch (ctx.session.inputState) {
+    case INPUT_STATE_CITY_NAME: {
+      ctx.reply(await requestWeatherFromUserCity(functionsInput));
+      break;
+    }
 
-bot.on(message('text'), (ctx) => {
-  if (isCityName(ctx)) {
-    requestWeatherFromUserCity(ctx);
+    case INPUT_STATE_NOTIFICATIONS_TIME: {
+      ctx.reply(await checkedNotificatedTimeNorms(functionsInput));
+      break;
+    }
+
+    case INPUT_STATE_NOTIFICATIONS_CITY: {
+      ctx.reply(await checkedNotificatedCity(functionsInput));
+      break;
+    }
+
+    case INPUT_STATE_TIMEZONE: {
+      ctx.reply(await checkedTimezone(functionsInput));
+      break;
+    }
   }
-  if (isNotification(ctx)) {
-    // return ctx.reply(`SECOND WORKING: ${ctx.message.text}`);
-    // console.log(typeof ctx.message.text);
-    checkedNotificatedTimeNorms(ctx);
-  }
-  // console.log(isFinite(ctx.message.text));
-  // console.log(Number.isFinite(ctx.message.text));
 });
 
+initializeBotCommands(bot.telegram);
 bot.launch();
 
-const { getWeatherByCityName, getWeatherByLocation } = require('./api/api');
-
 localSession.DB.then((DB) => {
-  // setTimeout(mdfckj, 10000, DB.get('sessions').value());
-  // console.log(DB.get('sessions').value());
-
-  setInterval(function mdfckj() {
+  setInterval(() => {
     const sessionData = DB.get('sessions').value();
-    let timeNow =
-      new Date().getUTCHours() * 60 * 60 + new Date().getUTCMinutes() * 60;
-    // console.log(timeNow);
-    sessionData.forEach(async ({ data: { timeNotified, userID, city } }) => {
-      if (timeNotified == timeNow) {
-        bot.telegram.sendMessage(userID, `${await notification(city)}`);
+    const date = new Date();
+
+    const timeNow = date.getUTCHours() * 60 * 60 + date.getUTCMinutes() * 60;
+
+    console.log(
+      `[CYCLE] Runned in ${new Date(timeNow * 1000).toLocaleTimeString(
+        'en-GB',
+        { timeZone: 'UTC' }
+      )} UTC`
+    );
+
+    sessionData.forEach(
+      async ({
+        data: { timeNotified, userID, timeNotifiedCity, timezone },
+      }) => {
+        const userTimezone = timezone || 0;
+
+        const timeNowForCheck = timeNow + userTimezone * 60 * 60;
+
+        console.log(
+          `[CYCLE] userID = ${userID}, timeNotified = ${timeNotified}, timeNotifiedCity = ${timeNotifiedCity}, timeNowForCheck = ${timeNowForCheck}`
+        );
+
+        if (
+          timeNotified == timeNowForCheck &&
+          timeNotifiedCity !== undefined &&
+          userID !== undefined
+        ) {
+          const cityWeather = await requestWeatherFromUserCity({
+            text: timeNotifiedCity,
+          });
+
+          bot.telegram.sendMessage(
+            userID,
+            `Сповіщення: ${
+              date.getUTCHours() + userTimezone
+            }:${date.getUTCMinutes()}.
+					\n${cityWeather}`
+          );
+        }
       }
-    });
+    );
   }, 60000);
 });
